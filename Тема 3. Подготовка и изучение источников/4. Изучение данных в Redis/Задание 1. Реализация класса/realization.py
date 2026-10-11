@@ -5,7 +5,7 @@ import redis
 
 class RedisClient:
     def __init__(self, host: str, port: int, password: str, cert_path: str) -> None:
-        # ╨Ш╨╜╨╕╤Ж╨╕╨░╨╗╨╕╨╖╨╕╤А╤Г╨╡╨╝ ╨║╨╗╨╕╨╡╨╜╤В Redis/Valkey ╤Б SSL-╨┐╨╛╨┤╨║╨╗╤О╤З╨╡╨╜╨╕╨╡╨╝
+        # Инициализируем клиент Redis/Valkey с SSL-подключением
         self._client = redis.StrictRedis(
             host=host,
             port=port,
@@ -15,14 +15,14 @@ class RedisClient:
         )
 
     def set(self, k: str, v: Dict) -> None:
-        # ╨б╨╡╤А╨╕╨░╨╗╨╕╨╖╤Г╨╡╨╝ ╤Б╨╗╨╛╨▓╨░╤А╤М ╨▓ JSON-╤Б╤В╤А╨╛╨║╤Г ╨╕ ╤Б╨╛╤Е╤А╨░╨╜╤П╨╡╨╝ ╨┐╨╛ ╨║╨╗╤О╤З╤Г k
-        # ensure_ascii=False тАФ ╤З╤В╨╛╨▒╤Л ╨║╨╕╤А╨╕╨╗╨╗╨╕╤Ж╨░ ╤Б╨╛╤Е╤А╨░╨╜╤П╨╗╨░╤Б╤М ╨▓ ╤З╨╕╤В╨░╨╡╨╝╨╛╨╝ ╨▓╨╕╨┤╨╡
+        # Сериализуем словарь в JSON-строку и сохраняем по ключу k
+        # ensure_ascii=False ? чтобы кириллица сохранялась в читаемом виде
         self._client.set(k, json.dumps(v, ensure_ascii=False))
 
     def get(self, k: str) -> Dict:
-        # ╨Я╨╛╨╗╤Г╤З╨░╨╡╨╝ ╨╖╨╜╨░╤З╨╡╨╜╨╕╨╡ ╨┐╨╛ ╨║╨╗╤О╤З╤Г
+        # Получаем значение по ключу
         result = self._client.get(k)
         if not result:
             return {}
-        # ╨Ф╨╡╨║╨╛╨┤╨╕╤А╤Г╨╡╨╝ ╨▒╨░╨╣╤В╤Л ╨▓ ╤Б╤В╤А╨╛╨║╤Г ╨╕ ╨┐╨░╤А╤Б╨╕╨╝ JSON ╨╛╨▒╤А╨░╤В╨╜╨╛ ╨▓ ╤Б╨╗╨╛╨▓╨░╤А╤М
+        # Декодируем байты в строку и парсим JSON обратно в словарь
         return json.loads(result.decode("utf-8"))
